@@ -7,5 +7,7 @@ defmodule CodingChallengeWeb.Router do
 
   scope "/api", CodingChallengeWeb do
     pipe_through :api
+
+    get "/", StatsController, :stats
   end
 end
