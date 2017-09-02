@@ -9,6 +9,7 @@ defmodule CodingChallenge.Stats.Supervisor do
 
   def init(:ok) do
     children = [
+      worker(CodingChallenge.Stats.Progress, []),
       worker(CodingChallenge.Stats.TwitterReceiver, [])
     ]
 

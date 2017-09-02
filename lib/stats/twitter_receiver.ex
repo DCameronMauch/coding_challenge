@@ -19,8 +19,8 @@ defmodule CodingChallenge.Stats.TwitterReceiver do
 
     stream = ExTwitter.stream_sample()
 
-    for message <- stream do
-      message.text |> IO.puts()
+    for _message <- stream do
+      CodingChallenge.Stats.Progress.tick()
     end
   end
 end
