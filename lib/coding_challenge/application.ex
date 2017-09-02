@@ -10,6 +10,7 @@ defmodule CodingChallenge.Application do
     children = [
       # Start the endpoint when the application starts
       supervisor(CodingChallengeWeb.Endpoint, []),
+      supervisor(CodingChallenge.Stats.Supervisor, [])
       # Start your own worker by calling: CodingChallenge.Worker.start_link(arg1, arg2, arg3)
       # worker(CodingChallenge.Worker, [arg1, arg2, arg3]),
     ]
