@@ -5,7 +5,8 @@ defmodule CodingChallengeWeb.StatsController do
 
   def stats(conn, _params) do
     stats = [
-      CodingChallenge.Stats.CountAggregator
+      CodingChallenge.Stats.CountAggregator,
+      CodingChallenge.Stats.HashTagAggregator
     ]
     |> Enum.reduce(%{}, fn(aggregator, accumulator) ->
       Map.merge(accumulator, aggregator.get_stats)

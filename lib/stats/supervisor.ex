@@ -12,6 +12,7 @@ defmodule CodingChallenge.Stats.Supervisor do
 
     children = [
       worker(CodingChallenge.Stats.CountAggregator, []),
+      worker(CodingChallenge.Stats.HashTagAggregator, []),
       :poolboy.child_spec(:text_processor_pool, poolboy_config(), time),
       worker(CodingChallenge.Stats.Progress, []),
       worker(CodingChallenge.Stats.TwitterReceiver, [])

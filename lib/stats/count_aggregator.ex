@@ -21,7 +21,6 @@ defmodule CodingChallenge.Stats.CountAggregator do
       total: 0,
 
       lists: %{
-        incoming: [],
         second: [],
         minute: [],
         hour: [],
@@ -42,7 +41,7 @@ defmodule CodingChallenge.Stats.CountAggregator do
     new_state = if sequence == state.sequence do
       incoming_state(state, count)
     else
-      stepped_state(state, sequence, count)
+      stepped_state(state, count)
     end
 
     {:noreply, new_state}
@@ -59,26 +58,23 @@ defmodule CodingChallenge.Stats.CountAggregator do
 
   defp incoming_state(state, count) do
     state
-    |> put_in([:total], count + state.total)
-    |> put_in([:lists, :incoming], [count | state.lists.incoming])
+    |> put_in([:total], state.total + count)
+    |> put_in([:lists, :second], [count | state.lists.second])
   end
 
-  defp stepped_state(state, sequence, count) do
-    incoming = Enum.sum(state.lists.incoming)
+  defp stepped_state(state, count) do
+    new_averages_second = Enum.sum(state.lists.second)
 
-    new_lists_second = [incoming]
-    new_lists_minute = [incoming | state.lists.minute] |> Enum.take(60)
-    new_lists_hour = [incoming | state.lists.hour] |> Enum.take(3600)
+    new_lists_minute = [new_averages_second | state.lists.minute] |> Enum.take(60)
+    new_lists_hour = [new_averages_second | state.lists.hour] |> Enum.take(3600)
 
-    new_averages_second = incoming
     new_averages_minute = average(new_lists_minute)
     new_averages_hour = average(new_lists_hour)
 
     state
-    |> put_in([:sequence], sequence)
-    |> put_in([:total], count + state.total)
-    |> put_in([:lists, :incoming], [count])
-    |> put_in([:lists, :second], new_lists_second)
+    |> put_in([:sequence], state.sequence + 1)
+    |> put_in([:total], state.total + count)
+    |> put_in([:lists, :second], [count])
     |> put_in([:lists, :minute], new_lists_minute)
     |> put_in([:lists, :hour], new_lists_hour)
     |> put_in([:averages, :second], new_averages_second)
