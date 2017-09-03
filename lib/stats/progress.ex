@@ -16,9 +16,12 @@ defmodule CodingChallenge.Stats.Progress do
   end
 
   def handle_cast(:tick, count) do
-    if count == 0 do
+    new_count = rem(count + 1, 100)
+
+#    if new_count == 0 do
 #      IO.write(".")
-    end
-    {:noreply, rem(count + 1, 100)}
+#    end
+
+    {:noreply, new_count}
   end
 end
