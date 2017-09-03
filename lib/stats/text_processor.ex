@@ -1,5 +1,6 @@
 defmodule CodingChallenge.Stats.TextProcessor do
   @moduledoc false
+  @step 1000
 
   use GenServer
 
@@ -8,10 +9,8 @@ defmodule CodingChallenge.Stats.TextProcessor do
   end
 
   def init(time) do
-    new_time = time + 1000
-    new_time |> tick()
-
-    state = new_time |> initial_state()
+    new_time = (time + @step) |> tick()
+    state = initial_state(0, new_time)
 
     {:ok, state}
   end
@@ -27,20 +26,20 @@ defmodule CodingChallenge.Stats.TextProcessor do
   def handle_info(:tick, state) do
     IO.puts("received tick: #{state.count}")
 
-    new_time = state.time + 1000
-    new_time |> tick()
-
-    new_state = new_time |> initial_state()
+    new_time = (state.time + @step) |> tick()
+    new_state = initial_state(state.sequence + 1, new_time)
 
     {:noreply, new_state}
   end
 
   defp tick(time) do
     Process.send_after(self(), :tick, time, abs: true)
+    time
   end
 
-  defp initial_state(time) do
+  defp initial_state(sequence, time) do
     %{
+      sequence: sequence,
       time: time,
       count: 0
     }
