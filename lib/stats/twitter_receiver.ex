@@ -19,8 +19,11 @@ defmodule CodingChallenge.Stats.TwitterReceiver do
 
     stream = ExTwitter.stream_sample()
 
-    for _message <- stream do
+    for message <- stream do
       CodingChallenge.Stats.Progress.tick()
+      :poolboy.transaction(:text_processor_pool, fn(pid) ->
+        GenServer.cast(pid, {:text, message.text})
+      end)
     end
   end
 end

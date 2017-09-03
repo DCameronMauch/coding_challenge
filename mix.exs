@@ -36,7 +36,8 @@ defmodule CodingChallenge.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:extwitter, "~> 0.8"}
+      {:extwitter, "~> 0.8"},
+      {:poolboy, "~> 1.5"}
     ]
   end
 end
