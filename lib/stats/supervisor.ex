@@ -11,7 +11,8 @@ defmodule CodingChallenge.Stats.Supervisor do
     time = System.monotonic_time(:millisecond)
 
     children = [
-    :poolboy.child_spec(:text_processor_pool, poolboy_config(), time),
+      worker(CodingChallenge.Stats.CountAggregator, []),
+      :poolboy.child_spec(:text_processor_pool, poolboy_config(), time),
       worker(CodingChallenge.Stats.Progress, []),
       worker(CodingChallenge.Stats.TwitterReceiver, [])
     ]

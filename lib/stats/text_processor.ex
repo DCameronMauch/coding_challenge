@@ -9,32 +9,31 @@ defmodule CodingChallenge.Stats.TextProcessor do
   end
 
   def init(time) do
-    new_time = (time + @step) |> tick()
+    new_time = tick(time)
     state = initial_state(0, new_time)
 
     {:ok, state}
   end
 
   def handle_cast({:text, _text}, state) do
-#    IO.puts("received text: #{text}")
-
     new_state = %{state | count: state.count + 1}
 
     {:noreply, new_state}
   end
 
   def handle_info(:tick, state) do
-    IO.puts("received tick: #{state.count}")
+    CodingChallenge.Stats.CountAggregator.aggregate({state.sequence, state.count})
 
-    new_time = (state.time + @step) |> tick()
+    new_time = tick(state.time)
     new_state = initial_state(state.sequence + 1, new_time)
 
     {:noreply, new_state}
   end
 
   defp tick(time) do
-    Process.send_after(self(), :tick, time, abs: true)
-    time
+    new_time = time + @step
+    Process.send_after(self(), :tick, new_time, abs: true)
+    new_time
   end
 
   defp initial_state(sequence, time) do

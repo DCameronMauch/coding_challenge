@@ -4,6 +4,13 @@ defmodule CodingChallengeWeb.StatsController do
   use CodingChallengeWeb, :controller
 
   def stats(conn, _params) do
-    render conn, "stats.json", stats: %{data: []}
+    stats = [
+      CodingChallenge.Stats.CountAggregator
+    ]
+    |> Enum.reduce(%{}, fn(aggregator, accumulator) ->
+      Map.merge(accumulator, aggregator.get_stats)
+    end)
+
+    render conn, "stats.json", stats: stats
   end
 end
