@@ -18,6 +18,7 @@ defmodule CodingChallenge.Stats.CountAggregator do
   def init(:ok) do
     state = %{
       sequence: 0,
+      total: 0,
 
       lists: %{
         incoming: [],
@@ -48,13 +49,17 @@ defmodule CodingChallenge.Stats.CountAggregator do
   end
 
   def handle_call(:get_stats, _from, state) do
-    averages = %{averages: state.averages}
+    stats = %{
+      total: state.total,
+      averages: state.averages
+    }
 
-    {:reply, averages, state}
+    {:reply, stats, state}
   end
 
   defp incoming_state(state, count) do
     state
+    |> put_in([:total], count + state.total)
     |> put_in([:lists, :incoming], [count | state.lists.incoming])
   end
 
@@ -71,6 +76,7 @@ defmodule CodingChallenge.Stats.CountAggregator do
 
     state
     |> put_in([:sequence], sequence)
+    |> put_in([:total], count + state.total)
     |> put_in([:lists, :incoming], [count])
     |> put_in([:lists, :second], new_lists_second)
     |> put_in([:lists, :minute], new_lists_minute)
