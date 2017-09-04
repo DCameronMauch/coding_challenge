@@ -37,7 +37,8 @@ defmodule CodingChallenge.Mixfile do
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:extwitter, "~> 0.8"},
-      {:poolboy, "~> 1.5"}
+      {:poolboy, "~> 1.5"},
+      {:exmoji, github: "mroth/exmoji", branch: "master"}
     ]
   end
 end

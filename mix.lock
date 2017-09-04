@@ -1,5 +1,6 @@
 %{"cowboy": {:hex, :cowboy, "1.1.2", "61ac29ea970389a88eca5a65601460162d370a70018afe6f949a29dca91f3bb0", [], [{:cowlib, "~> 1.0.2", [hex: :cowlib, repo: "hexpm", optional: false]}, {:ranch, "~> 1.3.2", [hex: :ranch, repo: "hexpm", optional: false]}], "hexpm"},
   "cowlib": {:hex, :cowlib, "1.0.2", "9d769a1d062c9c3ac753096f868ca121e2730b9a377de23dec0f7e08b1df84ee", [], [], "hexpm"},
+  "exmoji": {:git, "https://github.com/mroth/exmoji.git", "dedcfcdb0fb1e8a08292cb74fbb05e0a6630ee25", [branch: "master"]},
   "extwitter": {:hex, :extwitter, "0.8.6", "eb74428267805b376b898cf220ce40846668c6598ec763b45d705cd4f6a04e8d", [], [{:oauther, "~> 1.1", [hex: :oauther, repo: "hexpm", optional: false]}, {:poison, "~> 3.0", [hex: :poison, repo: "hexpm", optional: false]}], "hexpm"},
   "gettext": {:hex, :gettext, "0.13.1", "5e0daf4e7636d771c4c71ad5f3f53ba09a9ae5c250e1ab9c42ba9edccc476263", [], [], "hexpm"},
   "mime": {:hex, :mime, "1.1.0", "01c1d6f4083d8aa5c7b8c246ade95139620ef8effb009edde934e0ec3b28090a", [], [], "hexpm"},

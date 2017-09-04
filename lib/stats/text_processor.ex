@@ -136,7 +136,18 @@ defmodule CodingChallenge.Stats.TextProcessor do
     |> put_in([:photos], Helpers.count_map_merger(state.photos, %{photo => 1}))
   end
 
-  defp update_emojis(state, _text) do
-    state
+  defp update_emojis(state, text) do
+    emojis = Exmoji.Scanner.scan(text)
+    |> Enum.reduce(%{}, fn(emoji, accumulator) ->
+      Helpers.count_map_merger(accumulator, %{emoji.short_name => 1})
+    end)
+
+    if Enum.count(emojis) > 0 do
+      state
+      |> update_in([:counts, :emoji], &(&1 + 1))
+      |> put_in([:emojis], Helpers.count_map_merger(state.emojis, emojis))
+    else
+      state
+    end
   end
 end
