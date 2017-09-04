@@ -1,6 +1,8 @@
 defmodule CodingChallenge.Stats.CountAggregator do
   @moduledoc false
 
+  alias CodingChallenge.Stats.Helpers
+
   use GenServer
 
   def start_link do
@@ -18,7 +20,21 @@ defmodule CodingChallenge.Stats.CountAggregator do
   def init(:ok) do
     state = %{
       sequence: 0,
-      total: 0,
+
+      counts: %{
+        total: 0,
+        hash_tag: 0,
+        domain: 0,
+        photo: 0,
+        emoji: 0
+      },
+
+      percents: %{
+        hash_tag: 0,
+        domain: 0,
+        photo: 0,
+        emoji: 0
+      },
 
       lists: %{
         second: [],
@@ -37,11 +53,11 @@ defmodule CodingChallenge.Stats.CountAggregator do
     {:ok, state}
   end
 
-  def handle_cast({:aggregate, {sequence, count}}, state) do
+  def handle_cast({:aggregate, {sequence, counts}}, state) do
     new_state = if sequence == state.sequence do
-      incoming_state(state, count)
+      incoming_state(state, counts)
     else
-      stepped_state(state, count)
+      stepped_state(state, counts)
     end
 
     {:noreply, new_state}
@@ -49,37 +65,74 @@ defmodule CodingChallenge.Stats.CountAggregator do
 
   def handle_call(:get_stats, _from, state) do
     stats = %{
-      total: state.total,
+      counts: state.counts,
+      percents: state.percents,
       averages: state.averages
     }
 
     {:reply, stats, state}
   end
 
-  defp incoming_state(state, count) do
+  defp incoming_state(state, counts) do
     state
-    |> put_in([:total], state.total + count)
-    |> put_in([:lists, :second], [count | state.lists.second])
+    |> put_in([:lists, :second], [counts.total | state.lists.second])
+    |> update_counts(counts)
   end
 
-  defp stepped_state(state, count) do
-    new_averages_second = Enum.sum(state.lists.second)
+  defp stepped_state(state, counts) do
+    state
+    |> update_in([:sequence], &(&1 + 1))
+    |> update_percents()
+    |> update_lists(counts.total)
+    |> update_averages()
+    |> update_counts(counts)
+  end
 
-    new_lists_minute = [new_averages_second | state.lists.minute] |> Enum.take(60)
-    new_lists_hour = [new_averages_second | state.lists.hour] |> Enum.take(3600)
+  def update_counts(state, counts) do
+    state
+    |> put_in([:counts], Helpers.count_map_merger(state.counts, counts))
+  end
 
-    new_averages_minute = average(new_lists_minute)
-    new_averages_hour = average(new_lists_hour)
+  def update_percents(state) do
+    state
+    |> put_in([:percents, :hash_tag], percent(state.counts.hash_tag, state.counts.total))
+    |> put_in([:percents, :domain], percent(state.counts.domain, state.counts.total))
+    |> put_in([:percents, :photo], percent(state.counts.photo, state.counts.total))
+    |> put_in([:percents, :emoji], percent(state.counts.emoji, state.counts.total))
+  end
+
+  def update_lists(state, total) do
+    second = sum(state.lists.second)
+    minute = [second | state.lists.minute] |> Enum.take(60)
+    hour = [second | state.lists.hour] |> Enum.take(3600)
 
     state
-    |> put_in([:sequence], state.sequence + 1)
-    |> put_in([:total], state.total + count)
-    |> put_in([:lists, :second], [count])
-    |> put_in([:lists, :minute], new_lists_minute)
-    |> put_in([:lists, :hour], new_lists_hour)
-    |> put_in([:averages, :second], new_averages_second)
-    |> put_in([:averages, :minute], new_averages_minute)
-    |> put_in([:averages, :hour], new_averages_hour)
+    |> put_in([:lists, :second], [total])
+    |> put_in([:lists, :minute], minute)
+    |> put_in([:lists, :hour], hour)
+  end
+
+  def update_averages(state) do
+    [second | _tail] = state.lists.minute
+    minute = average(state.lists.minute)
+    hour = average(state.lists.hour)
+
+    state
+    |> put_in([:averages, :second], second)
+    |> put_in([:averages, :minute], minute)
+    |> put_in([:averages, :hour], hour)
+  end
+
+  defp percent(_, 0), do: 0
+
+  defp percent(dividend, divisor) do
+    div(100 * dividend, divisor)
+  end
+
+  defp sum([]), do: 0
+
+  defp sum(list) do
+    Enum.sum(list)
   end
 
   defp average([]), do: 0
