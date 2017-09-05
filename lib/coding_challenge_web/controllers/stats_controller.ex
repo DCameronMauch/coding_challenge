@@ -5,14 +5,14 @@ defmodule CodingChallengeWeb.StatsController do
 
   def stats(conn, _params) do
     stats = [
-      CodingChallenge.Stats.CountAggregator,
-      CodingChallenge.Stats.HashtagAggregator,
-      CodingChallenge.Stats.DomainAggregator,
-      CodingChallenge.Stats.PhotoAggregator,
-      CodingChallenge.Stats.EmojiAggregator
+      {CodingChallenge.Stats.CountsAggregator, []},
+      {CodingChallenge.Stats.GenListAggregator, [:hashtags]},
+      {CodingChallenge.Stats.GenListAggregator, [:domains]},
+      {CodingChallenge.Stats.GenListAggregator, [:photos]},
+      {CodingChallenge.Stats.GenListAggregator, [:emojis]}
     ]
-    |> Enum.reduce(%{}, fn(aggregator, accumulator) ->
-      Map.merge(accumulator, aggregator.get_stats)
+    |> Enum.reduce(%{}, fn({aggregator, args}, accumulator) ->
+      Map.merge(accumulator, apply(aggregator, :get_stats, args))
     end)
 
     render conn, "stats.json", stats: stats

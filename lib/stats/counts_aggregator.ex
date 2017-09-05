@@ -1,4 +1,4 @@
-defmodule CodingChallenge.Stats.CountAggregator do
+defmodule CodingChallenge.Stats.CountsAggregator do
   @moduledoc false
 
   alias CodingChallenge.Stats.Helpers

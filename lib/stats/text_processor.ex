@@ -28,11 +28,11 @@ defmodule CodingChallenge.Stats.TextProcessor do
   end
 
   def handle_info(:tick, state) do
-    CodingChallenge.Stats.CountAggregator.aggregate({state.sequence, state.counts})
-    CodingChallenge.Stats.HashtagAggregator.aggregate({state.sequence, state.hashtags})
-    CodingChallenge.Stats.DomainAggregator.aggregate({state.sequence, state.domains})
-    CodingChallenge.Stats.PhotoAggregator.aggregate({state.sequence, state.photos})
-    CodingChallenge.Stats.EmojiAggregator.aggregate({state.sequence, state.emojis})
+    CodingChallenge.Stats.CountsAggregator.aggregate({state.sequence, state.counts})
+    CodingChallenge.Stats.GenListAggregator.aggregate(:hashtags, {state.sequence, state.hashtags})
+    CodingChallenge.Stats.GenListAggregator.aggregate(:domains, {state.sequence, state.domains})
+    CodingChallenge.Stats.GenListAggregator.aggregate(:photos, {state.sequence, state.photos})
+    CodingChallenge.Stats.GenListAggregator.aggregate(:emojis, {state.sequence, state.emojis})
 
     new_time = tick(state.time)
     new_state = initial_state(state.sequence + 1, new_time)
