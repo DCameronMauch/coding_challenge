@@ -20,9 +20,12 @@ defmodule CodingChallenge.Stats.TextProcessor do
   def handle_cast({:text, text}, state) do
     new_state = state
     |> update_in([:counts, :total], &(&1 + 1))
-    |> update_hashtags(text)
-    |> update_domains_photos(text)
-    |> update_emojis(text)
+    |> put_in([:text], text)
+    |> put_in([:components], SocialParser.extract(text, [:hashtags, :links]))
+    |> update_hashtags
+    |> update_domains
+    |> update_photos
+    |> update_emojis
 
     {:noreply, new_state}
   end
@@ -50,13 +53,15 @@ defmodule CodingChallenge.Stats.TextProcessor do
     %{
       sequence: sequence,
       time: time,
+      text: nil,
+      components: nil,
 
       counts: %{
         total: 0,
-        hashtag: 0,
-        domain: 0,
-        photo: 0,
-        emoji: 0
+        hashtags: 0,
+        domains: 0,
+        photos: 0,
+        emojis: 0
       },
 
       hashtags: %{},
@@ -66,89 +71,50 @@ defmodule CodingChallenge.Stats.TextProcessor do
     }
   end
 
-  @hashtag_regex ~r/\s+#[\w-]+/u
+  defp update_hashtags(state) do
+    hashtags = Map.get(state.components, :hashtags, [])
+    |> Enum.filter(&String.printable?/1)
 
-  defp update_hashtags(state, text) do
-    hashtags = get_hashtags(text)
-
-    if Enum.count(hashtags) > 0 do
-      state
-      |> update_in([:counts, :hashtag], &(&1 + 1))
-      |> put_in([:hashtags], Helpers.count_map_merger(state.hashtags, hashtags))
-    else
-      state
-    end
+    generic_updater(state, :hashtags, hashtags)
   end
 
-  defp get_hashtags(text) do
-    Regex.scan(@hashtag_regex, " " <> String.downcase(text))
-    |> Enum.reduce(%{}, fn([hashtag], accumulator) ->
-      Helpers.count_map_merger(accumulator, %{String.trim_leading(hashtag) => 1})
-    end)
+  defp update_domains(state) do
+    domains = Map.get(state.components, :links, [])
+    |> Enum.filter(&String.printable?/1)
+    |> Enum.map(&get_domain/1)
+
+    generic_updater(state, :domains, domains)
   end
 
-  defp update_domains_photos(state, text) do
-    domain = get_domain(text)
-    photo = get_photo(domain)
-
-    state
-    |> update_domains(domain)
-    |> update_photos(photo)
+  defp get_domain(url) do
+    URI.parse(url).host
   end
 
-  @domain_regex ~r/\s+https?:\/\/[\w\.-]+/u
+  defp update_photos(state) do
+    photos = Map.get(state.components, :links, [])
+    |> Enum.filter(&String.printable?/1)
+    |> Enum.filter(&is_photo/1)
 
-  defp get_domain(text) do
-    case Regex.run(@domain_regex, " " <> String.downcase(text)) do
-      nil -> nil
-      [url] -> String.trim_leading(url)
-    end
-    |> case do
-         nil -> nil
-         "http://" <> domain -> domain
-         "https://" <> domain -> domain
-    end
+    generic_updater(state, :photos, photos)
   end
 
-  @twitter "pic.twitter.com"
-  @instagram "instagram"
-
-  defp get_photo(nil), do: nil
-
-  defp get_photo(domain) do
-    if String.contains?(domain, [@twitter, @instagram]) do
-      domain
-    else
-      nil
-    end
+  defp is_photo(url) do
+    String.ends_with?(url, [".gif", ".jpg", ".jpeg", ".png", ".tiff", ".bmp"])
   end
 
-  defp update_domains(state, nil), do: state
+  defp update_emojis(state) do
+    emojis = Exmoji.Scanner.scan(state.text)
+    |> Enum.map(&(&1.short_name))
 
-  defp update_domains(state, domain) do
-    state
-    |> update_in([:counts, :domain], &(&1 + 1))
-    |> put_in([:domains], Helpers.count_map_merger(state.domains, %{domain => 1}))
+    generic_updater(state, :emojis, emojis)
   end
 
-  defp update_photos(state, nil), do: state
-
-  defp update_photos(state, photo) do
-    state
-    |> update_in([:counts, :photo], &(&1 + 1))
-    |> put_in([:photos], Helpers.count_map_merger(state.photos, %{photo => 1}))
-  end
-
-  defp update_emojis(state, text) do
-    emojis = Exmoji.Scanner.scan(text)
-    |> Enum.reduce(%{}, fn(emoji, accumulator) ->
-      Helpers.count_map_merger(accumulator, %{emoji.short_name => 1})
-    end)
-
-    if Enum.count(emojis) > 0 do
-      state
-      |> update_in([:counts, :emoji], &(&1 + 1))
-      |> put_in([:emojis], Helpers.count_map_merger(state.emojis, emojis))
+  def generic_updater(state, name, objects) do
+    if Enum.count(objects) > 0 do
+      Enum.reduce(objects, state, fn(object, aggregator) ->
+        put_in(aggregator, [name], Helpers.count_map_merger(state[name], %{object => 1}))
+      end)
+      |> update_in([:counts, name], &(&1 + 1))
     else
       state
     end

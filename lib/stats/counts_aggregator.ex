@@ -23,17 +23,17 @@ defmodule CodingChallenge.Stats.CountsAggregator do
 
       counts: %{
         total: 0,
-        hashtag: 0,
-        domain: 0,
-        photo: 0,
-        emoji: 0
+        hashtags: 0,
+        domains: 0,
+        photos: 0,
+        emojis: 0
       },
 
       percents: %{
-        hashtag: 0,
-        domain: 0,
-        photo: 0,
-        emoji: 0
+        hashtags: 0,
+        domains: 0,
+        photos: 0,
+        emojis: 0
       },
 
       lists: %{
@@ -89,16 +89,14 @@ defmodule CodingChallenge.Stats.CountsAggregator do
   end
 
   def update_counts(state, counts) do
-    state
-    |> put_in([:counts], Helpers.count_map_merger(state.counts, counts))
+    put_in(state, [:counts], Helpers.count_map_merger(state.counts, counts))
   end
 
   def update_percents(state) do
-    state
-    |> put_in([:percents, :hashtag], percent(state.counts.hashtag, state.counts.total))
-    |> put_in([:percents, :domain], percent(state.counts.domain, state.counts.total))
-    |> put_in([:percents, :photo], percent(state.counts.photo, state.counts.total))
-    |> put_in([:percents, :emoji], percent(state.counts.emoji, state.counts.total))
+    Map.keys(state.percents)
+    |> Enum.reduce(state, fn(key, accumulator) ->
+      put_in(accumulator, [:percents, key], percent(state.counts[key], state.counts.total))
+    end)
   end
 
   def update_lists(state, total) do
