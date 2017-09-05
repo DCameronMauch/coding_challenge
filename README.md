@@ -29,52 +29,59 @@
 ```json
 {
     "top_photos": [],
-    "top_hash_tags": [
-        "#serendipity",
+    "top_hashtags": [
         "#izmirescort",
-        "#jusapolunepnygc",
-        "#laborday",
-        "#love_yourself",
-        "#pushawardsmaywards",
-        "#kcacolombia",
-        "#daca",
-        "#방탄소년단"
+        "#DACA",
+        "#PushAwardsKathNiels",
+        "#'D39H/JG_'DJ'('F",
+        "#DefendDACA",
+        "#PushAwardsMayWards",
+        "#SpiritualTeacher_SaintRampalJi",
+        "#BurmaMassacre",
+        "#EXO_POWER",
+        "#VeranoMTV2017"
     ],
     "top_emojis": [
         "joy",
         "heart",
         "sob",
         "heart_eyes",
-        "fire",
-        "two_hearts",
         "recycle",
-        "scream",
+        "two_hearts",
+        "pray",
         "sparkles",
-        "point_down"
+        "fire",
+        "clap"
     ],
     "top_domains": [
         "t.co",
-        "t",
-        "t.c",
-        "t."
+        "&",
+        "t&",
+        "t.c&",
+        "t.&",
+        "t.co&",
+        "twitter.com",
+        null,
+        "denver.joblink.direcdtory",
+        "ift.tt"
     ],
     "percents": {
-        "photo": 0,
-        "hash_tag": 18,
-        "emoji": 15,
-        "domain": 47
+        "photos": 0,
+        "hashtags": 16,
+        "emojis": 14,
+        "domains": 45
     },
     "counts": {
-        "total": 12711,
-        "photo": 0,
-        "hash_tag": 2328,
-        "emoji": 1978,
-        "domain": 5982
+        "total": 90190,
+        "photos": 0,
+        "hashtags": 14796,
+        "emojis": 13045,
+        "domains": 41422
     },
     "averages": {
-        "second": 31,
-        "minute": 36,
-        "hour": 37
+        "second": 38,
+        "minute": 46,
+        "hour": 49
     }
 }
 ```
