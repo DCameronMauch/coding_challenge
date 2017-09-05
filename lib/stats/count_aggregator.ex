@@ -23,14 +23,14 @@ defmodule CodingChallenge.Stats.CountAggregator do
 
       counts: %{
         total: 0,
-        hash_tag: 0,
+        hashtag: 0,
         domain: 0,
         photo: 0,
         emoji: 0
       },
 
       percents: %{
-        hash_tag: 0,
+        hashtag: 0,
         domain: 0,
         photo: 0,
         emoji: 0
@@ -95,7 +95,7 @@ defmodule CodingChallenge.Stats.CountAggregator do
 
   def update_percents(state) do
     state
-    |> put_in([:percents, :hash_tag], percent(state.counts.hash_tag, state.counts.total))
+    |> put_in([:percents, :hashtag], percent(state.counts.hashtag, state.counts.total))
     |> put_in([:percents, :domain], percent(state.counts.domain, state.counts.total))
     |> put_in([:percents, :photo], percent(state.counts.photo, state.counts.total))
     |> put_in([:percents, :emoji], percent(state.counts.emoji, state.counts.total))

@@ -20,7 +20,7 @@ defmodule CodingChallenge.Stats.TextProcessor do
   def handle_cast({:text, text}, state) do
     new_state = state
     |> update_in([:counts, :total], &(&1 + 1))
-    |> update_hash_tags(text)
+    |> update_hashtags(text)
     |> update_domains_photos(text)
     |> update_emojis(text)
 
@@ -29,7 +29,10 @@ defmodule CodingChallenge.Stats.TextProcessor do
 
   def handle_info(:tick, state) do
     CodingChallenge.Stats.CountAggregator.aggregate({state.sequence, state.counts})
-    CodingChallenge.Stats.ListTagAggregator.aggregate({state.sequence, state.hash_tags, state.domains, state.photos, state.emojis})
+    CodingChallenge.Stats.HashtagAggregator.aggregate({state.sequence, state.hashtags})
+    CodingChallenge.Stats.DomainAggregator.aggregate({state.sequence, state.domains})
+    CodingChallenge.Stats.PhotoAggregator.aggregate({state.sequence, state.photos})
+    CodingChallenge.Stats.EmojiAggregator.aggregate({state.sequence, state.emojis})
 
     new_time = tick(state.time)
     new_state = initial_state(state.sequence + 1, new_time)
@@ -50,37 +53,37 @@ defmodule CodingChallenge.Stats.TextProcessor do
 
       counts: %{
         total: 0,
-        hash_tag: 0,
+        hashtag: 0,
         domain: 0,
         photo: 0,
         emoji: 0
       },
 
-      hash_tags: %{},
+      hashtags: %{},
       domains: %{},
       photos: %{},
       emojis: %{}
     }
   end
 
-  @hash_tag_regex ~r/\s+#[\w-]+/u
+  @hashtag_regex ~r/\s+#[\w-]+/u
 
-  defp update_hash_tags(state, text) do
-    hash_tags = get_hash_tags(text)
+  defp update_hashtags(state, text) do
+    hashtags = get_hashtags(text)
 
-    if Enum.count(hash_tags) > 0 do
+    if Enum.count(hashtags) > 0 do
       state
-      |> update_in([:counts, :hash_tag], &(&1 + 1))
-      |> put_in([:hash_tags], Helpers.count_map_merger(state.hash_tags, hash_tags))
+      |> update_in([:counts, :hashtag], &(&1 + 1))
+      |> put_in([:hashtags], Helpers.count_map_merger(state.hashtags, hashtags))
     else
       state
     end
   end
 
-  defp get_hash_tags(text) do
-    Regex.scan(@hash_tag_regex, " " <> String.downcase(text))
-    |> Enum.reduce(%{}, fn([hash_tag], accumulator) ->
-      Helpers.count_map_merger(accumulator, %{String.trim_leading(hash_tag) => 1})
+  defp get_hashtags(text) do
+    Regex.scan(@hashtag_regex, " " <> String.downcase(text))
+    |> Enum.reduce(%{}, fn([hashtag], accumulator) ->
+      Helpers.count_map_merger(accumulator, %{String.trim_leading(hashtag) => 1})
     end)
   end
 
